@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Lora } from "next/font/google";
 import "./globals.css";
 import "./milktea.css";
 
@@ -13,9 +13,18 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Serif for headings — includes the Vietnamese subset so stacked
+// diacritics (e.g. "uống") render correctly.
+const lora = Lora({
+  variable: "--font-serif",
+  subsets: ["latin", "vietnamese"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "AURATEA - Premium Bubble Tea",
-  description: "Premium bubble tea landing page.",
+  title: "AURATEA - Trà sữa Đà Nẵng",
+  description:
+    "Website bán trà sữa AURATEA tại Đà Nẵng với menu, tùy chỉnh ly, giỏ hàng và đặt hàng nhanh.",
 };
 
 export default function RootLayout({
@@ -26,7 +35,7 @@ export default function RootLayout({
   return (
     <html
       lang="vi"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${lora.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

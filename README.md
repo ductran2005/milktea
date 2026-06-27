@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AURATEA - Website trà sữa
 
-## Getting Started
+Website giới thiệu và bán trà sữa AURATEA tại Đà Nẵng, được xây dựng bằng Next.js.
 
-First, run the development server:
+## Chạy dự án
+
+```bash
+npm install
+npm run dev
+```
+
+Mở trình duyệt tại:
+
+```bash
+http://localhost:3000
+```
+
+## Lệnh thường dùng
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run build
+npm run start
+npm run lint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Cấu trúc chính
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `app/MilkTeaPage.tsx`: giao diện chính của website.
+- `app/milktea.css`: style cho website trà sữa.
+- `public/milktea-assets`: hình ảnh sản phẩm.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Nội dung website
 
-## Learn More
+Website hiện có các phần:
 
-To learn more about Next.js, take a look at the following resources:
+- Trang đầu giới thiệu sản phẩm nổi bật.
+- Thực đơn trà sữa.
+- Tùy chỉnh độ ngọt, đá, size và topping.
+- Giỏ hàng dạng drawer.
+- Câu chuyện nguyên liệu.
+- Ưu đãi mẫu.
+- Đánh giá khách hàng demo.
+- Khu vực giao hàng tại Đà Nẵng.
+- Form đặt hàng nhanh.
+- Cửa hàng và bản đồ.
+- Thành viên tích dấu.
+- CTA cuối trang.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Thay thông tin cửa hàng
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Trong `app/MilkTeaPage.tsx`, tìm và thay các placeholder:
 
-## Deploy on Vercel
+- `[ĐỊA CHỈ CỬA HÀNG]`
+- `[SỐ ĐIỆN THOẠI]`
+- `[SO_DIEN_THOAI_ZALO]`
+- `[LINK GOOGLE MAPS]`
+- `[GIỜ MỞ CỬA]`
+- `[THÔNG TIN CHỖ ĐỂ XE]`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Ảnh sản phẩm nằm trong `public/milktea-assets`.
