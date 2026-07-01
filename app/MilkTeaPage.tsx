@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { type CSSProperties, type PointerEvent, useEffect, useMemo, useRef, useState } from "react";
+import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 
 type Drink = {
   id: string;
@@ -133,7 +133,6 @@ function buildMessage(cart: CartItem[], total: number) {
 
 export default function MilkTeaPage() {
   const shellRef = useRef<HTMLElement>(null);
-  const heroRef = useRef<HTMLElement>(null);
   const [activeIndex, setActiveIndex] = useState(2);
   const [menuOpen, setMenuOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
@@ -174,18 +173,12 @@ export default function MilkTeaPage() {
       gsap.registerPlugin(ScrollTrigger);
 
       gsap.fromTo(
-        ".hero-copy .eyebrow, .hero-copy h1, .hero-copy h2, .hero-copy p, .hero-price, .hero-buttons",
-        { y: 36, opacity: 0, clipPath: "inset(0 0 100% 0)" },
-        { y: 0, opacity: 1, clipPath: "inset(0 0 0% 0)", duration: 0.9, stagger: 0.08, ease: "power3.out" },
-      );
-
-      gsap.fromTo(
         ".hero-carousel",
-        { y: 70, opacity: 0, filter: "blur(10px)" },
-        { y: 0, opacity: 1, filter: "blur(0px)", duration: 1.05, ease: "power3.out", clearProps: "all" },
+        { y: 42, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.75, ease: "power3.out", clearProps: "all" },
       );
 
-      gsap.utils.toArray<HTMLElement>(".reveal").forEach((element, index) => {
+      gsap.utils.toArray<HTMLElement>(".reveal:not(.hero-carousel):not(.hero-card)").forEach((element, index) => {
         gsap.fromTo(
           element,
           { y: 54, opacity: 0, clipPath: "inset(12% 0 0 0)" },
@@ -247,9 +240,9 @@ export default function MilkTeaPage() {
 
     import("gsap").then(({ gsap }) => {
       gsap.fromTo(
-        ".hero-copy h1, .hero-copy h2, .hero-copy p, .hero-price, .hero-card",
-        { y: 18, opacity: 0, filter: "blur(8px)" },
-        { y: 0, opacity: 1, filter: "blur(0px)", duration: 0.52, stagger: 0.04, ease: "power2.out" },
+        ".hero-card",
+        { y: 14, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.38, ease: "power2.out" },
       );
       gsap.fromTo(".hero-cup.front img", { scale: 0.94 }, { scale: 1, duration: 0.62, ease: "back.out(1.5)" });
     });
@@ -287,14 +280,6 @@ export default function MilkTeaPage() {
     setToppings((current) => (current.includes(name) ? current.filter((item) => item !== name) : [...current, name]));
   };
 
-  const handleHeroPointerMove = (event: PointerEvent<HTMLElement>) => {
-    const bounds = event.currentTarget.getBoundingClientRect();
-    const x = (event.clientX - bounds.left) / bounds.width - 0.5;
-    const y = (event.clientY - bounds.top) / bounds.height - 0.5;
-    event.currentTarget.style.setProperty("--parallax-x", `${x * 24}px`);
-    event.currentTarget.style.setProperty("--parallax-y", `${y * 18}px`);
-  };
-
   return (
     <main ref={shellRef} className="site-shell" style={{ "--active-color": activeDrink.color } as CSSProperties}>
       <div className="loading-strip" />
@@ -324,29 +309,11 @@ export default function MilkTeaPage() {
         </div>
       </header>
 
-      <section ref={heroRef} className="hero-section" id="trang-chu" onPointerMove={handleHeroPointerMove}>
+      <section className="hero-section" id="trang-chu">
         <span className="hero-glow" />
         <span className="hero-pearl pearl-one" />
         <span className="hero-pearl pearl-two" />
         <span className="hero-leaf" />
-        <div className="hero-copy reveal">
-          <p className="eyebrow">Premium milk tea</p>
-          <h1>
-            Không chỉ là trà sữa.
-            <span>Mà là gu của bạn.</span>
-          </h1>
-          <h2>Trà pha mới, sữa béo nhẹ, trân châu mềm dai.</h2>
-          <p>
-            AURATEA làm trà sữa như một thói quen dễ thương mỗi ngày: vị rõ, topping đầy,
-            có thể chỉnh đường đá theo đúng khẩu vị của bạn.
-          </p>
-          <div className="hero-price">Từ {formatPrice(activeDrink.priceM)}</div>
-          <div className="hero-buttons">
-            <button className="primary-button" type="button" onClick={() => addToCart(activeDrink)}>Đặt món ngay</button>
-            <a className="secondary-button" href="#menu">Xem menu</a>
-          </div>
-        </div>
-
         <div className="hero-carousel reveal" aria-label="Bộ sưu tập trà sữa">
           {drinks.map((drink, index) => {
             const offset = (index - activeIndex + 3) % 3;
@@ -359,7 +326,14 @@ export default function MilkTeaPage() {
                 onClick={() => setActiveIndex(index)}
                 aria-label={`Chọn ${drink.name}`}
               >
-                <Image src={drink.image} alt={drink.name} width={943} height={1668} priority={index === activeIndex} />
+                <Image
+                  src={drink.image}
+                  alt={drink.name}
+                  width={943}
+                  height={1668}
+                  priority={index === activeIndex}
+                  sizes="(max-width: 760px) 62vw, (max-width: 1120px) 42vw, 31vw"
+                />
               </button>
             );
           })}
