@@ -196,7 +196,7 @@ function mapPayload(payload: CmsPayload): LandingData {
 }
 
 export async function getLandingData(): Promise<LandingData> {
-  const baseUrl = process.env.CMS_API_URL ?? "http://localhost:3000";
+  const baseUrl = process.env.CMS_API_URL ?? "https://cms-trasua.vercel.app";
 
   try {
     const response = await fetch(`${baseUrl}/api/public/landing`, {
