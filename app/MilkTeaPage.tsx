@@ -3,17 +3,7 @@
 import Image from "next/image";
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 
-type Drink = {
-  id: string;
-  name: string;
-  badge: string;
-  description: string;
-  priceM: number;
-  priceL: number;
-  image: string;
-  color: string;
-  ingredients: string[];
-};
+import type { Drink, LandingData } from "./cms";
 
 type CartItem = {
   id: string;
@@ -26,52 +16,8 @@ type CartItem = {
   unitPrice: number;
 };
 
-const drinks: Drink[] = [
-  {
-    id: "duong-den",
-    name: "Trà sữa đường đen",
-    badge: "Bán chạy",
-    description: "Trà sữa thơm đậm, sữa tươi béo nhẹ và trân châu đường đen nấu mới mỗi ngày.",
-    priceM: 39000,
-    priceL: 49000,
-    image: "/milktea-assets/clean-brown-sugar-cutout.png",
-    color: "#d7a85b",
-    ingredients: ["Trà đen", "Sữa tươi", "Đường đen", "Trân châu đen"],
-  },
-  {
-    id: "matcha-kem-sua",
-    name: "Matcha kem sữa",
-    badge: "Vị thanh",
-    description: "Matcha xanh thơm, lớp kem sữa béo nhẹ và hậu vị mát hợp ngày nắng Đà Nẵng.",
-    priceM: 45000,
-    priceL: 55000,
-    image: "/milktea-assets/clean-matcha-cutout.png",
-    color: "#9ebe65",
-    ingredients: ["Matcha", "Sữa tươi", "Kem sữa", "Trân châu đen"],
-  },
-  {
-    id: "khoai-mon-may-tim",
-    name: "Khoai môn mây tím",
-    badge: "Món mới",
-    description: "Khoai môn tím thơm, chất sữa mịn và màu ly nổi bật khi chụp ảnh cùng bạn bè.",
-    priceM: 42000,
-    priceL: 52000,
-    image: "/milktea-assets/clean-taro-cutout.png",
-    color: "#b990d7",
-    ingredients: ["Khoai môn", "Sữa tươi", "Kem mây", "Trân châu"],
-  },
-];
-
 const sugarLevels = ["0%", "30%", "50%", "70%", "100%"];
 const iceLevels = ["Không đá", "Ít đá", "Bình thường", "Nhiều đá"];
-const toppingOptions = [
-  { name: "Trân châu đen", price: 7000 },
-  { name: "Trân châu trắng", price: 7000 },
-  { name: "Thạch đào", price: 6000 },
-  { name: "Pudding trứng", price: 8000 },
-  { name: "Kem cheese", price: 10000 },
-  { name: "Thạch cà phê", price: 6000 },
-];
 
 const quickInfo = [
   "Trà ủ mới mỗi ngày",
@@ -105,13 +51,6 @@ const reviews = [
   },
 ];
 
-const promotions = [
-  ["Ưu đãi 1", "Mua 2 ly giảm 15%", "Thời hạn: chủ cửa hàng cập nhật"],
-  ["Ưu đãi 2", "Miễn phí topping cho đơn đầu tiên", "Thời hạn: chủ cửa hàng cập nhật"],
-  ["Ưu đãi 3", "Giảm 20% cho sinh viên", "Thời hạn: chủ cửa hàng cập nhật"],
-  ["Ưu đãi 4", "Miễn phí giao hàng trong bán kính 3 km", "Thời hạn: chủ cửa hàng cập nhật"],
-];
-
 function formatPrice(price: number) {
   return `${price.toLocaleString("vi-VN")}đ`;
 }
@@ -131,9 +70,10 @@ function buildMessage(cart: CartItem[], total: number) {
   );
 }
 
-export default function MilkTeaPage() {
+export default function MilkTeaPage({ data }: { data: LandingData }) {
+  const { drinks, toppings: toppingOptions, promotions, store, content } = data;
   const shellRef = useRef<HTMLElement>(null);
-  const [activeIndex, setActiveIndex] = useState(2);
+  const [activeIndex, setActiveIndex] = useState(drinks.length > 2 ? 2 : 0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -284,9 +224,9 @@ export default function MilkTeaPage() {
     <main ref={shellRef} className="site-shell" style={{ "--active-color": activeDrink.color } as CSSProperties}>
       <div className="loading-strip" />
       <header className={`site-header ${isScrolled ? "is-scrolled" : ""}`}>
-        <a className="brand" href="#trang-chu" aria-label="Trang chủ AURATEA">
-          <strong>AURATEA</strong>
-          <span>Trà thơm đúng vị, ngọt vừa đúng gu</span>
+        <a className="brand" href="#trang-chu" aria-label={`Trang chủ ${store.name}`}>
+          <strong>{store.name}</strong>
+          <span>{content.heroTitle}</span>
         </a>
 
         <nav className={`nav-links ${menuOpen ? "is-open" : ""}`} aria-label="Điều hướng chính">
@@ -302,7 +242,7 @@ export default function MilkTeaPage() {
           <button className="cart-button" type="button" onClick={() => setCartOpen(true)} aria-label="Mở giỏ hàng">
             Giỏ hàng <span>{cartCount}</span>
           </button>
-          <a className="primary-button" href="#tao-ly">Đặt trà ngay</a>
+          <a className="primary-button" href="#tao-ly">{content.ctaButton}</a>
           <button className="menu-button" type="button" onClick={() => setMenuOpen((value) => !value)} aria-label="Mở menu">
             ☰
           </button>
@@ -316,7 +256,7 @@ export default function MilkTeaPage() {
         <span className="hero-leaf" />
         <div className="hero-carousel reveal" aria-label="Bộ sưu tập trà sữa">
           {drinks.map((drink, index) => {
-            const offset = (index - activeIndex + 3) % 3;
+            const offset = (index - activeIndex + drinks.length) % drinks.length;
             const position = offset === 0 ? "front" : offset === 1 ? "right" : "left";
             return (
               <button
@@ -337,7 +277,7 @@ export default function MilkTeaPage() {
               </button>
             );
           })}
-          <button className="next-drink" type="button" onClick={() => setActiveIndex((activeIndex + 1) % 3)}>
+          <button className="next-drink" type="button" onClick={() => setActiveIndex((activeIndex + 1) % drinks.length)}>
             Món tiếp theo
           </button>
         </div>
@@ -460,7 +400,8 @@ export default function MilkTeaPage() {
       <section className="section-block ingredient-section" id="nguyen-lieu">
         <div className="section-heading reveal">
           <p className="eyebrow">Câu chuyện nguyên liệu</p>
-          <h2>Một ly ngon bắt đầu từ nguyên liệu tốt</h2>
+          <h2>{content.storyTitle}</h2>
+          <p>{content.storyDesc}</p>
         </div>
         <div className="story-grid">
           {[
@@ -484,11 +425,11 @@ export default function MilkTeaPage() {
           <p>Nội dung ưu đãi là dữ liệu mẫu để chủ cửa hàng chỉnh sửa trước khi chạy thật.</p>
         </div>
         <div className="promo-grid">
-          {promotions.map(([label, title, date]) => (
-            <article className="promo-card reveal" key={title}>
-              <span>{label}</span>
-              <h3>{title}</h3>
-              <p>{date}</p>
+          {promotions.map((promotion) => (
+            <article className="promo-card reveal" key={promotion.title}>
+              <span>{promotion.label}</span>
+              <h3>{promotion.title}</h3>
+              <p>{promotion.date}</p>
               <button type="button">Sử dụng ưu đãi</button>
             </article>
           ))}
@@ -563,10 +504,10 @@ export default function MilkTeaPage() {
           <p className="eyebrow">Cửa hàng</p>
           <h2>Ghé cửa hàng và thưởng thức một ly thật chill</h2>
           <ul>
-            <li>Địa chỉ: [ĐỊA CHỈ CỬA HÀNG]</li>
-            <li>Giờ mở cửa: [GIỜ MỞ CỬA]</li>
-            <li>Số điện thoại: [SỐ ĐIỆN THOẠI]</li>
-            <li>Chỗ để xe: [THÔNG TIN CHỖ ĐỂ XE]</li>
+            <li>Địa chỉ: {store.address}</li>
+            <li>Giờ mở cửa: {store.hours}</li>
+            <li>Số điện thoại: {store.phone}</li>
+            <li>Email: {store.email}</li>
           </ul>
           <a
             className="secondary-button"
@@ -582,10 +523,10 @@ export default function MilkTeaPage() {
       <footer className="site-footer">
         <div>
           <a className="brand" href="#trang-chu">
-            <strong>AURATEA</strong>
-            <span>Trà thơm đúng vị, ngọt vừa đúng gu.</span>
+            <strong>{store.name}</strong>
+            <span>{content.heroTitle}</span>
           </a>
-          <p>Một ly trà mát lành cho những ngày nắng Đà Nẵng.</p>
+          <p>{content.heroDesc}</p>
         </div>
         <div>
           <h3>Liên kết</h3>
@@ -596,10 +537,10 @@ export default function MilkTeaPage() {
         </div>
         <div>
           <h3>Liên hệ</h3>
-          <p>[ĐỊA CHỈ CỬA HÀNG]</p>
-          <p>[SỐ ĐIỆN THOẠI]</p>
-          <p>hello@auratea.vn</p>
-          <p>[GIỜ MỞ CỬA]</p>
+          <p>{store.address}</p>
+          <p>{store.phone}</p>
+          <p>{store.email}</p>
+          <p>{store.hours}</p>
         </div>
         <div>
           <h3>Mạng xã hội</h3>
