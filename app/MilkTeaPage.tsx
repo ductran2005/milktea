@@ -36,21 +36,21 @@ const reviews = [
     avatar: "/milktea-assets/reviews/minh-anh.png",
     area: "Hải Châu",
     drink: "Trà sữa đường đen",
-    text: "Trà thơm, không quá ngọt. Trân châu mềm và giao hàng khá nhanh.",
+    text: "Trà thơm, 50% đường vừa miệng. Trân châu mềm.",
   },
   {
     name: "Quốc Huy",
     avatar: "/milktea-assets/reviews/quoc-huy.png",
     area: "Thanh Khê",
     drink: "Matcha kem sữa",
-    text: "Matcha thơm, lớp kem sữa béo nhẹ. Bao bì nhìn rất đẹp.",
+    text: "Matcha đậm vị, kem sữa béo nhẹ, không ngọt gắt.",
   },
   {
     name: "Bảo Trân",
     avatar: "/milktea-assets/reviews/bao-tran.png",
     area: "Sơn Trà",
     drink: "Ô long đào",
-    text: "Vị thanh, uống mát và hợp để đặt sau giờ học.",
+    text: "Ô long thơm, đào giòn, ít đá vẫn đậm vị.",
   },
 ];
 
@@ -514,11 +514,11 @@ export default function MilkTeaPage({ data }: { data: LandingData }) {
 
       <section className="section-block review-section">
         <div className="review-summary reveal">
-          <p className="eyebrow">Đánh giá demo</p>
+          <p className="eyebrow">Khách hàng nói gì</p>
           <h2>Được yêu thích bởi những tín đồ trà sữa</h2>
           <div className="rating-box">
             <strong data-counter="4.8">4.8/5</strong>
-            <span>Dữ liệu đánh giá minh họa</span>
+            <span>Đánh giá trung bình</span>
           </div>
         </div>
         <div className="review-list">
