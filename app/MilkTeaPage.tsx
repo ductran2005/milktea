@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 
-import type { Drink, LandingData } from "./cms";
+import type { Drink, LandingData, Promotion } from "./cms";
 
 type CartItem = {
   id: string;
@@ -33,18 +33,21 @@ const districts = ["Hải Châu", "Thanh Khê", "Sơn Trà", "Ngũ Hành Sơn", 
 const reviews = [
   {
     name: "Minh Anh",
+    avatar: "/milktea-assets/reviews/minh-anh.png",
     area: "Hải Châu",
     drink: "Trà sữa đường đen",
     text: "Trà thơm, không quá ngọt. Trân châu mềm và giao hàng khá nhanh.",
   },
   {
     name: "Quốc Huy",
+    avatar: "/milktea-assets/reviews/quoc-huy.png",
     area: "Thanh Khê",
     drink: "Matcha kem sữa",
     text: "Matcha thơm, lớp kem sữa béo nhẹ. Bao bì nhìn rất đẹp.",
   },
   {
     name: "Bảo Trân",
+    avatar: "/milktea-assets/reviews/bao-tran.png",
     area: "Sơn Trà",
     drink: "Ô long đào",
     text: "Vị thanh, uống mát và hợp để đặt sau giờ học.",
@@ -55,7 +58,7 @@ function formatPrice(price: number) {
   return `${price.toLocaleString("vi-VN")}đ`;
 }
 
-function buildMessage(cart: CartItem[], total: number) {
+function buildMessage(cart: CartItem[], total: number, promotion: Promotion | null, discount: number) {
   const lines = cart.map(
     (item) =>
       `${item.quantity}x ${item.drink.name} size ${item.size}\n- Đường: ${item.sugar}\n- Đá: ${item.ice}\n- Topping: ${
@@ -63,8 +66,12 @@ function buildMessage(cart: CartItem[], total: number) {
       }`,
   );
 
+  const promotionLine = promotion
+    ? `\nƯu đãi: ${promotion.title}\nGiảm giá tạm tính: ${formatPrice(discount)}`
+    : "";
+
   return encodeURIComponent(
-    `Xin chào, tôi muốn đặt:\n\n${lines.join("\n\n")}\n\nTổng cộng: ${formatPrice(
+    `Xin chào, tôi muốn đặt:\n\n${lines.join("\n\n")}${promotionLine}\n\nTổng cộng: ${formatPrice(
       total,
     )}\n\nTên khách hàng:\nSố điện thoại:\nĐịa chỉ nhận hàng:`,
   );
@@ -82,6 +89,7 @@ export default function MilkTeaPage({ data }: { data: LandingData }) {
   const [ice, setIce] = useState("Ít đá");
   const [toppings, setToppings] = useState<string[]>(["Trân châu đen"]);
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [selectedPromotion, setSelectedPromotion] = useState<Promotion | null>(null);
 
   const activeDrink = drinks[activeIndex];
   const toppingTotal = toppings.reduce((sum, topping) => {
@@ -91,10 +99,66 @@ export default function MilkTeaPage({ data }: { data: LandingData }) {
   const customPrice = (size === "M" ? activeDrink.priceM : activeDrink.priceL) + toppingTotal;
   const subtotal = cart.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
   const deliveryFee = cart.length > 0 ? 15000 : 0;
-  const discount = 0;
-  const total = subtotal + deliveryFee - discount;
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-  const orderMessage = useMemo(() => buildMessage(cart, total), [cart, total]);
+  const promotionResult = useMemo(() => {
+    if (!selectedPromotion) {
+      return { discount: 0, message: "", eligible: false };
+    }
+
+    if (cartCount === 0) {
+      return { discount: 0, message: "Thêm món vào giỏ để áp dụng ưu đãi.", eligible: false };
+    }
+
+    const title = selectedPromotion.title.toLocaleLowerCase("vi");
+    const percentMatch = title.match(/(\d+)\s*%/);
+    const percent = percentMatch ? Number(percentMatch[1]) : 0;
+    const minimumMatch = title.match(/mua\s+(\d+)\s+ly/);
+    const minimum = minimumMatch ? Number(minimumMatch[1]) : 0;
+
+    if (title.includes("topping")) {
+      const toppingDiscount = cart.reduce((highestPrice, item) => {
+        const itemHighestPrice = item.toppings.reduce((highest, toppingName) => {
+          const price = toppingOptions.find((option) => option.name === toppingName)?.price ?? 0;
+          return Math.max(highest, price);
+        }, 0);
+        return Math.max(highestPrice, itemHighestPrice);
+      }, 0);
+
+      return toppingDiscount > 0
+        ? { discount: Math.min(toppingDiscount, subtotal), message: "Đã miễn phí một topping có giá cao nhất.", eligible: true }
+        : { discount: 0, message: "Hãy thêm ít nhất một topping để nhận ưu đãi.", eligible: false };
+    }
+
+    if (minimum > 0 && cartCount < minimum) {
+      return {
+        discount: 0,
+        message: `Cần thêm ${minimum - cartCount} ly để đủ điều kiện ưu đãi.`,
+        eligible: false,
+      };
+    }
+
+    if (percent > 0) {
+      return {
+        discount: Math.min(Math.round((subtotal * percent) / 100), subtotal),
+        message: title.includes("sinh viên")
+          ? "Đã áp dụng tạm tính. Vui lòng xuất trình thẻ sinh viên khi nhận hàng."
+          : `Đã giảm ${percent}% giá trị món trong giỏ.`,
+        eligible: true,
+      };
+    }
+
+    return {
+      discount: 0,
+      message: "Cửa hàng sẽ xác nhận điều kiện ưu đãi khi nhận đơn.",
+      eligible: true,
+    };
+  }, [cart, cartCount, selectedPromotion, subtotal, toppingOptions]);
+  const discount = promotionResult.discount;
+  const total = Math.max(0, subtotal + deliveryFee - discount);
+  const orderMessage = useMemo(
+    () => buildMessage(cart, total, selectedPromotion, discount),
+    [cart, discount, selectedPromotion, total],
+  );
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 24);
@@ -426,11 +490,23 @@ export default function MilkTeaPage({ data }: { data: LandingData }) {
         </div>
         <div className="promo-grid">
           {promotions.map((promotion) => (
-            <article className="promo-card reveal" key={promotion.title}>
+            <article
+              className={`promo-card reveal ${selectedPromotion?.title === promotion.title ? "is-selected" : ""}`}
+              key={promotion.title}
+            >
               <span>{promotion.label}</span>
               <h3>{promotion.title}</h3>
               <p>{promotion.date}</p>
-              <button type="button">Sử dụng ưu đãi</button>
+              <button
+                type="button"
+                aria-pressed={selectedPromotion?.title === promotion.title}
+                onClick={() => {
+                  setSelectedPromotion(promotion);
+                  setCartOpen(true);
+                }}
+              >
+                {selectedPromotion?.title === promotion.title ? "Đã chọn ưu đãi" : "Sử dụng ưu đãi"}
+              </button>
             </article>
           ))}
         </div>
@@ -448,7 +524,13 @@ export default function MilkTeaPage({ data }: { data: LandingData }) {
         <div className="review-list">
           {reviews.map((review) => (
             <article className="review-card reveal" key={review.name}>
-              <div className="avatar">{review.name.charAt(0)}</div>
+              <Image
+                className="avatar"
+                src={review.avatar}
+                width={54}
+                height={54}
+                alt=""
+              />
               <p>“{review.text}”</p>
               <strong>{review.name} — {review.area}</strong>
               <span>Món đã gọi: {review.drink}</span>
@@ -583,6 +665,16 @@ export default function MilkTeaPage({ data }: { data: LandingData }) {
           )}
         </div>
         <div className="cart-summary">
+          {selectedPromotion && (
+            <div className={`applied-promotion ${promotionResult.eligible ? "is-eligible" : ""}`} role="status">
+              <div>
+                <span>Ưu đãi đang chọn</span>
+                <strong>{selectedPromotion.title}</strong>
+              </div>
+              <p>{promotionResult.message}</p>
+              <button type="button" onClick={() => setSelectedPromotion(null)}>Bỏ ưu đãi</button>
+            </div>
+          )}
           <p><span>Tạm tính</span><strong>{formatPrice(subtotal)}</strong></p>
           <p><span>Phí giao hàng</span><strong>{formatPrice(deliveryFee)}</strong></p>
           <p><span>Giảm giá</span><strong>{formatPrice(discount)}</strong></p>

@@ -83,7 +83,7 @@ const LOCAL_IMAGES: Record<string, string> = {
   "trà sữa đường đen": "/milktea-assets/clean-brown-sugar-cutout.png",
   "matcha kem sữa": "/milktea-assets/clean-matcha-cutout.png",
   "khoai môn mây tím": "/milktea-assets/clean-taro-cutout.png",
-  "ô long đào": "/milktea-assets/clean-oolong-peach-cutout.png",
+  "ô long đào": "/milktea-assets/clean-oolong-peach-cutout-v2.png",
 };
 
 const DEFAULT_INGREDIENTS = ["Trà ủ mới", "Sữa tươi", "Trân châu"];
